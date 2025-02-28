@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,10 +122,13 @@ class _MyHomePageState extends State<MyHomePage> {
     mapController.setMapStyle(styleJson);
   }
 
+  DatabaseReference? _dbRef;
+
   @override
   void initState() {
     super.initState();
     _getUserLocation();
+    _dbRef = FirebaseDatabase.instance.ref();
   }
 
   Future<void> _getUserLocation() async {
@@ -178,6 +182,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Move camera to the new position
       mapController.animateCamera(CameraUpdate.newLatLng(_currentPosition!));
+    });
+
+    // push location info to firebase
+    _dbRef?.child("locations/nFcPC2FWpjNcyfAhGWgvEkszWBX2").set({
+      "latitude": position.latitude,
+      "longitude": position.longitude,
+      "timestamp": ServerValue.timestamp,
     });
   }
 
